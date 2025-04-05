@@ -20,8 +20,9 @@ OUTPUT_LINUX_BINARIES=${OUTPUT_LINUX_BINARIES:-false}  # Default to not output b
 USE_CACHE=${USE_CACHE:-false}  # Default to not using cache
 
 # Set output and working directories
-OUTPUT_DIR=${OUTPUT_DIR:-"/output"}
+OUTPUT_DIR=${OUTPUT_DIR:-"/root/output"}
 mkdir -p "${OUTPUT_DIR}"
+sudo chmod -R 777 "${OUTPUT_DIR}"
 WORKING_DIR=${WORKING_DIR:-"/root"}
 
 # Define build configurations
@@ -54,7 +55,8 @@ BUILD_TYPE=${BUILD_TYPE:-Release}  # Default to Release mode
 echo "🛠️ Building Citron (Version: ${CITRON_VERSION}, Mode: ${CITRON_BUILD_MODE}, Build: ${BUILD_TYPE})"
 
 # Check if CITRON_VERSION exists on the remote repository
-CITRON_REPO="https://git.citron-emu.org/Citron/Citron.git"
+#CITRON_REPO="https://git.citron-emu.org/Citron/Citron.git"
+CITRON_REPO="https://github.com/WolfSc84/Citron_Wolf.git"
 
 # Check if CITRON_VERSION is a commit hash
 if [[ "${CITRON_VERSION}" =~ ^[0-9a-f]{7,40}$ ]]; then
@@ -182,7 +184,8 @@ cmake .. -GNinja \
   -DCMAKE_C_FLAGS="$C_FLAGS" \
   -DUSE_DISCORD_PRESENCE=OFF \
   -DBUNDLE_SPEEX=ON \
-  -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 ninja
 ninja install
@@ -217,6 +220,8 @@ chmod +x ./squashfs-root/AppRun
 
 # Move the most recently created AppImage to a fresh output folder
 APPIMAGE_PATH=$(ls -t ${WORKING_DIR}/Citron/build/deploy-linux/*.AppImage 2>/dev/null | head -n 1)
+chmod +x "$APPIMAGE_PATH"
+chmod 777 "$APPIMAGE_PATH"
 
 if [[ -n "$APPIMAGE_PATH" ]]; then
     mv -f "$APPIMAGE_PATH" "${OUTPUT_DIR}/${OUTPUT_NAME}.AppImage"

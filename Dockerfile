@@ -9,6 +9,12 @@ RUN pacman -Syu --needed --noconfirm base-devel boost catch2 cmake ffmpeg fmt gi
 # Set working directory
 WORKDIR /root
 
+# Creating folder to place artifcat
+RUN ls -a
+RUN mkdir -p /root/output
+RUN chmod 777 /root/output
+RUN ls -a
+
 # Copy the build script
 COPY build-citron.sh /root/build-citron.sh
 RUN chmod +x /root/build-citron.sh

@@ -13,7 +13,7 @@ if ! command -v podman &>/dev/null; then
 fi
 
 # Define image name
-IMAGE_NAME="localhost/citron-builder"
+IMAGE_NAME="wolf-build/citron-builder"
 
 # Ask user for version
 echo "========================================"
@@ -78,7 +78,7 @@ podman run --rm \
     -e CITRON_BUILD_MODE="$CITRON_BUILD_MODE" \
     -e OUTPUT_LINUX_BINARIES="$OUTPUT_LINUX_BINARIES" \
     -e USE_CACHE="$USE_CACHE" \
-    -v "$(pwd)":/output \
+    -v "$(pwd)"/output:/output \
     "$IMAGE_NAME"
 
 # Ask the user if they want to delete the Podman image
