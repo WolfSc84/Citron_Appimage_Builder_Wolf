@@ -1,0 +1,16 @@
+services:
+  citron-builder:
+    hostname: citron-builder
+    container_name: citron-builder
+    image: ${IMAGE_NAME}
+    env_file:
+      - .env
+    environment:
+      - CITRON_VERSION=${CITRON_VERSION}
+      - CITRON_BUILD_MODE=${CITRON_BUILD_MODE}
+      - OUTPUT_LINUX_BINARIES=${OUTPUT_LINUX_BINARIES}
+      - USE_CACHE=${USE_CACHE}
+    privileged: true
+    volumes:
+      - ./output:/root/output
+

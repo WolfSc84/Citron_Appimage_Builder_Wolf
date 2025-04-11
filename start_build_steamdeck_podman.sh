@@ -12,6 +12,13 @@ if ! command -v podman &>/dev/null; then
     exit 1
 fi
 
+# Check if Podman Compose is installed
+echo "Checking for Podman Compose installation..."
+if ! command -v podman-compose &>/dev/null; then
+    echo "Podman Compose is not installed. Please install it first."
+    exit 1
+fi
+
 # Define image name
 IMAGE_NAME="wolf-build/citron-builder"
 
@@ -71,15 +78,38 @@ if [[ "$OUTPUT_BINARIES" == "1" ]]; then OUTPUT_LINUX_BINARIES=true; fi
 echo "Building the Podman image..."
 podman build -t "$IMAGE_NAME" .
 
+# Creating host folders and files
+mkdir -p "$(pwd)/output"
+chmod -R 777 "$(pwd)/output"
+echo "Created directory for artifact generated... Path= $(pwd)/output"
+
+if [ -f "$(pwd)/.env" ]; then
+  rm -R "$(pwd)/.env"
+  echo "Adjusting configurations according to selection"
+else
+  echo "Generating build configurations."
+fi
+
+cat > .env <<EOF
+CITRON_VERSION="$CITRON_VERSION"
+CITRON_BUILD_MODE="$CITRON_BUILD_MODE"
+OUTPUT_LINUX_BINARIES="$OUTPUT_LINUX_BINARIES"
+USE_CACHE="$USE_CACHE"
+IMAGE_NAME="$IMAGE_NAME"
+EOF
+
 # Run the container with selected options
 echo "Running the build container..."
-podman run --rm \
-    -e CITRON_VERSION="$CITRON_VERSION" \
-    -e CITRON_BUILD_MODE="$CITRON_BUILD_MODE" \
-    -e OUTPUT_LINUX_BINARIES="$OUTPUT_LINUX_BINARIES" \
-    -e USE_CACHE="$USE_CACHE" \
-    -v "$(pwd)"/output:/output \
-    "$IMAGE_NAME"
+podman-compose -f compose-builder.yml up
+
+# podman run --rm \
+#     -e CITRON_VERSION="$CITRON_VERSION" \
+#     -e CITRON_BUILD_MODE="$CITRON_BUILD_MODE" \
+#     -e OUTPUT_LINUX_BINARIES="$OUTPUT_LINUX_BINARIES" \
+#     -e USE_CACHE="$USE_CACHE" \
+#     --mount type=bind,source="$(pwd)/output",target=/root/output,relabel=shared \
+#     -v "$(pwd)/output:/output:z" \
+#     "$IMAGE_NAME"
 
 # Ask the user if they want to delete the Podman image
 echo "========================================"
